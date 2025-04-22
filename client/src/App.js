@@ -1,4 +1,3 @@
-// client/src/App.js
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
@@ -68,14 +67,16 @@ function App() {
       <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1em' }}>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {chat.map((msg, idx) => {
+            // 處理系統訊息
             if (msg.type === 'system') {
               return (
-                <li key={idx} style={{ textAlign: 'center', color: 'gray', margin: '8px 0' }}>
+                <li key={idx} className="message-system">
                   {msg.text}
                 </li>
               );
             }
 
+            // 判斷是否是自己發的訊息
             const isSelf = msg.user === username;
             return (
               <li
@@ -86,17 +87,9 @@ function App() {
                   marginBottom: '8px',
                 }}
               >
-                <div
-                  style={{
-                    background: isSelf ? '#d1e7dd' : '#f1f1f1',
-                    padding: '8px 12px',
-                    borderRadius: '12px',
-                    maxWidth: '60%',
-                    textAlign: 'left',
-                  }}
-                >
+                <div className={isSelf ? 'message-self' : 'message-other'}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>
-                    👤 [{msg.user}]
+                    👤 {msg.user}
                   </div>
                   <div>{msg.text}</div>
                 </div>
