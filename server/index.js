@@ -22,7 +22,8 @@ io.on("connection", (socket) => {
     console.log("🔌 A user connected");
 
     socket.on("chat message", (msg) => {
-        io.emit("chat message", msg); // 廣播給全部人
+        console.log("📩", msg);
+        io.emit("chat message", msg); // { user, text }
     });
 
     socket.on("disconnect", () => {
