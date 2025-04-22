@@ -49,7 +49,7 @@ function App() {
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
-    document.body.classList.toggle('dark-mode', newMode); 
+    // document.body.classList.toggle('dark-mode', newMode); 
     localStorage.setItem('darkMode', newMode);
   };
 
@@ -76,13 +76,14 @@ function App() {
   // 還沒登入的畫面
   if (!username) {
     return (
-      <div style={{ padding: 20 }}>
+      <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
         <h2>👋 Welcome to Chat</h2>
         <form onSubmit={handleLogin}>
           <input
             value={tempName}
             onChange={(e) => setTempName(e.target.value)}
             placeholder="Enter your name"
+            style={{ marginRight: 10 }}
           />
           <button type="submit">Join Chat</button>
         </form>
@@ -100,7 +101,7 @@ function App() {
         onClick={toggleDarkMode}
         className="mode-toggle-button"
       >
-        <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`} style={{ fontSize: '24px', color: isDarkMode ? '#fff' : '#000' }}></i>
+        <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`}></i>
       </button>
 
       <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1em' }}>

@@ -2,30 +2,43 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* === App Layout === */
+.app-container {
+  min-height: 100vh;
+  padding: 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Mode */
+.app-container:not(.dark-mode) {
   background-color: #ffffff;
   color: #000000;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Dark Mode */
+.app-container.dark-mode {
+  background-color: #1e1e1e;
+  color: #eee;
 }
 
-/* === Chat Message Styles === */
-.message-self {
-  background-color: #d1e7dd;
-  border-radius: 16px 16px 0 16px;
-  margin-left: auto;
-}
-
+/* === Chat Messages === */
+.message-self,
 .message-other {
-  background-color: #f1f1f1;
-  border-radius: 16px 16px 16px 0;
-  margin-right: auto;
+  padding: 10px 15px;
+  max-width: 80%;
+  border-radius: 12px;
+  word-break: break-word;
+  line-height: 1.6;
+  transition: all 0.3s ease;
 }
 
 .message-system {
@@ -35,20 +48,21 @@ code {
   text-align: center;
   padding: 5px 0;
   margin: 10px 0;
-}
-
-.message-self,
-.message-other,
-.message-system {
   transition: all 0.3s ease;
 }
 
-/* === Dark Mode Styles === */
-.app-container.dark-mode  {
-  background-color: #1e1e1e;
-  color: #eee;
+/* Message Colors (Light Mode) */
+.message-self {
+  background-color: #d1e7dd;
+  margin-left: auto;
 }
 
+.message-other {
+  background-color: #f1f1f1;
+  margin-right: auto;
+}
+
+/* Message Colors (Dark Mode) */
 .app-container.dark-mode .message-self {
   background-color: #357960;
   color: white;
@@ -77,32 +91,23 @@ code {
 
 .mode-toggle-button i {
   font-size: 24px;
-  color: #000;
   transition: color 0.3s ease, transform 0.2s ease;
 }
 
+/* Toggle Icon Colors */
 .app-container.dark-mode .mode-toggle-button i {
   color: #fff;
+}
+
+.app-container:not(.dark-mode) .mode-toggle-button i {
+  color: #000;
 }
 
 .mode-toggle-button:hover i {
   transform: scale(1.1);
 }
 
-/* === System Preference (Fallback only) === */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #1e1e1e;
-    color: #eee;
-  }
-}
-
-.message-self,
-.message-other {
-  word-break: break-word;
-  line-height: 1.5;
-}
-
+/* === Form Elements === */
 input,
 button {
   padding: 8px 12px;
@@ -119,4 +124,12 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+/* === System Preference (Fallback only) === */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1e1e1e;
+    color: #eee;
+  }
 }
