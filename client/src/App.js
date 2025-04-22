@@ -67,15 +67,42 @@ function App() {
       <h2>💬 Chat Room - Hello, {username}!</h2>
       <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1em' }}>
         <ul style={{ listStyle: 'none', padding: 0 }}>
-          {chat.map((msg, idx) => (
-            <li key={idx} style={{ marginBottom: '8px' }}>
-              {msg.type === 'chat' ? (
-                <span><strong>👤 [{msg.user}]</strong>: {msg.text}</span>
-              ) : (
-                <span style={{ color: 'gray' }}>{msg.text}</span>
-              )}
-            </li>
-          ))}
+          {chat.map((msg, idx) => {
+            if (msg.type === 'system') {
+              return (
+                <li key={idx} style={{ textAlign: 'center', color: 'gray', margin: '8px 0' }}>
+                  {msg.text}
+                </li>
+              );
+            }
+
+            const isSelf = msg.user === username;
+            return (
+              <li
+                key={idx}
+                style={{
+                  display: 'flex',
+                  justifyContent: isSelf ? 'flex-end' : 'flex-start',
+                  marginBottom: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    background: isSelf ? '#d1e7dd' : '#f1f1f1',
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    maxWidth: '60%',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>
+                    👤 [{msg.user}]
+                  </div>
+                  <div>{msg.text}</div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
       <form onSubmit={handleSend}>
