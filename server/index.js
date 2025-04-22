@@ -21,14 +21,27 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("🔌 A user connected");
 
-    socket.on("chat message", (msg) => {
-        io.emit("chat message", msg); // { user, text }
+    // 監聽登入事件（帶上 user name）
+    socket.on("join", (username) => {
+        socket.username = username; // 記住這個使用者
+        console.log(`📥 ${username} joined`);
+        io.emit("system message", `📥 [${username}] joined the chat`);
     });
 
+    // 普通訊息
+    socket.on("chat message", (msg) => {
+        io.emit("chat message", msg);
+    });
+
+    // 離線時發送系統訊息
     socket.on("disconnect", () => {
-        console.log("❌ A user disconnected");
+        if (socket.username) {
+            console.log(`📤 ${socket.username} left`);
+            io.emit("system message", `📤 [${socket.username}] left the chat`);
+        }
     });
 });
+
 
 server.listen(3001, () => {
     console.log("✅ Server running on http://localhost:3001");

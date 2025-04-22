@@ -15,9 +15,14 @@ function App() {
       console.log('✅ Connected to server');
     });
 
+    // 聊天訊息
     socket.on('chat message', (msg) => {
-      console.log('📩 Received:', msg);
-      setChat((prev) => [...prev, msg]);
+      setChat((prev) => [...prev, { type: 'chat', ...msg }]);
+    });
+
+    // 系統訊息（加入/離開）
+    socket.on('system message', (text) => {
+      setChat((prev) => [...prev, { type: 'system', text }]);
     });
 
     return () => socket.disconnect();
@@ -35,6 +40,7 @@ function App() {
     e.preventDefault();
     if (tempName.trim()) {
       setUsername(tempName);
+      socket.emit('join', tempName); // let backend know user join
     }
   };
 
@@ -63,7 +69,11 @@ function App() {
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {chat.map((msg, idx) => (
             <li key={idx} style={{ marginBottom: '8px' }}>
-              <strong>👤 [{msg.user}]</strong>: {msg.text}
+              {msg.type === 'chat' ? (
+                <span><strong>👤 [{msg.user}]</strong>: {msg.text}</span>
+              ) : (
+                <span style={{ color: 'gray' }}>{msg.text}</span>
+              )}
             </li>
           ))}
         </ul>
