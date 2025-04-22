@@ -5,7 +5,10 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: '*',  // 或者指定你前端網址也行
+    methods: ['GET', 'POST'],
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {

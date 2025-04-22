@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3001'); // 部署後要改網址！
+const socket = io('https://chat-app-server-rbkm.onrender.com'); // 部署後要改網址！
 
 function App() {
   const [message, setMessage] = useState('');
