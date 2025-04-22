@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 
 const socket = io('https://chat-app-server-rbkm.onrender.com');
@@ -8,6 +8,19 @@ function App() {
   const [tempName, setTempName] = useState('');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
+
+  const getInitialMode = () => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored !== null) return stored === 'true';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
+  const messagesEndRef = useRef(null);
+
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chat]);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -24,8 +37,25 @@ function App() {
       setChat((prev) => [...prev, { type: 'system', text }]);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      socket.off('chat message');
+      socket.off('system message');
+      socket.disconnect();
+    };
+
   }, []);
+
+  // 切換模式
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    document.body.classList.toggle('dark-mode', newMode); 
+    localStorage.setItem('darkMode', newMode);
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -62,8 +92,17 @@ function App() {
 
   // 聊天畫面
   return (
-    <div style={{ padding: 20 }}>
+    <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
       <h2>💬 Chat Room - Hello, {username}!</h2>
+
+      {/* 手動切換亮暗模式圖示 */}
+      <button
+        onClick={toggleDarkMode}
+        className="mode-toggle-button"
+      >
+        <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`} style={{ fontSize: '24px', color: isDarkMode ? '#fff' : '#000' }}></i>
+      </button>
+
       <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1em' }}>
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {chat.map((msg, idx) => {
@@ -107,6 +146,7 @@ function App() {
         />
         <button type="submit">Send</button>
       </form>
+      <div ref={messagesEndRef} style={{ height: '1px', marginBottom: '80px' }} />
     </div>
   );
 }
