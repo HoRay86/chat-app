@@ -8,6 +8,8 @@ function App() {
   const [tempName, setTempName] = useState('');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
+  const [userCount, setUserCount] = useState(0);
+  const [userList, setUserList] = useState([]);
 
   const getInitialMode = () => {
     const stored = localStorage.getItem('darkMode');
@@ -17,9 +19,12 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
   const messagesEndRef = useRef(null);
 
-
+  
   useEffect(() => {
-    scrollToBottom();
+    const timeout = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    return () => clearTimeout(timeout);
   }, [chat]);
 
   useEffect(() => {
@@ -36,10 +41,20 @@ function App() {
     socket.on('system message', (text) => {
       setChat((prev) => [...prev, { type: 'system', text }]);
     });
+    socket.on('user count', (count) => {
+      console.log('user count', count)
+      setUserCount(count);
+    });
+    socket.on('user list', (list) => {
+      console.log('user list', list)
+      setUserList(list);
+    });
 
     return () => {
       socket.off('chat message');
       socket.off('system message');
+      socket.off('user count');
+      socket.off('user list');
       socket.disconnect();
     };
 
@@ -49,7 +64,6 @@ function App() {
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
-    // document.body.classList.toggle('dark-mode', newMode); 
     localStorage.setItem('darkMode', newMode);
   };
 
@@ -76,14 +90,14 @@ function App() {
   // 還沒登入的畫面
   if (!username) {
     return (
-      <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
+      <div className={`login-container ${isDarkMode ? 'dark-mode' : ''}`}>
         <h2>👋 Welcome to Chat</h2>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', gap: '10px' }}>
           <input
             value={tempName}
             onChange={(e) => setTempName(e.target.value)}
             placeholder="Enter your name"
-            style={{ marginRight: 10 }}
+            style={{ borderRadius: '5px', padding: '5px' }}
           />
           <button type="submit">Join Chat</button>
         </form>
@@ -95,6 +109,8 @@ function App() {
   return (
     <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
       <h2>💬 Chat Room - Hello, {username}!</h2>
+      {/* <p>👥 {userCount} Online</p>
+      <p>🧍 Online Users: {userList.join(', ')}</p> */}
 
       {/* 手動切換亮暗模式圖示 */}
       <button
@@ -104,8 +120,8 @@ function App() {
         <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`}></i>
       </button>
 
-      <div style={{ maxHeight: '400px', overflowY: 'auto', marginBottom: '1em' }}>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+      <div className="chat-area">
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {chat.map((msg, idx) => {
             // 處理系統訊息
             if (msg.type === 'system') {
@@ -137,17 +153,17 @@ function App() {
             );
           })}
         </ul>
+        <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSend}>
+
+      <form onSubmit={handleSend} className="chat-input-area">
         <input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          style={{ width: '70%', marginRight: '8px' }}
         />
         <button type="submit">Send</button>
       </form>
-      <div ref={messagesEndRef} style={{ height: '1px', marginBottom: '80px' }} />
     </div>
   );
 }

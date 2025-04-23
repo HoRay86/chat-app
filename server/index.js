@@ -17,15 +17,23 @@ const io = new Server(server, {
         methods: ["GET", "POST"]
     }
 });
+let users = {};
+const sendUserList = () => {
+  const userList = Object.values(users);
+  io.emit("user list", userList);
+};
 
 io.on("connection", (socket) => {
-    console.log("🔌 A user connected");
 
     // 監聽登入事件（帶上 user name）
     socket.on("join", (username) => {
+        socket.username = username;
+        users[socket.id] = username;
         socket.username = username; // 記住這個使用者
         console.log(`📥 ${username} joined`);
         io.emit("system message", `📥 [${username}] joined the chat`);
+        io.emit("user count", Object.keys(users).length);
+        sendUserList(); // 傳送新的用戶列表
     });
 
     // 普通訊息
@@ -35,14 +43,20 @@ io.on("connection", (socket) => {
 
     // 離線時發送系統訊息
     socket.on("disconnect", () => {
-        if (socket.username) {
-            console.log(`📤 ${socket.username} left`);
-            io.emit("system message", `📤 [${socket.username}] left the chat`);
+        if (users[socket.id]) {
+            const name = users[socket.id];
+            console.log(`📤 ${name} left (${socket.id})`);
+            io.emit("system message", `📤 [${name}] left the chat`);
+            delete users[socket.id];
+            io.emit("user count", Object.keys(users).length);
+            sendUserList(); // ✅ 傳送更新後的用戶列表
         }
     });
 });
 
 
-server.listen(3001, () => {
-    console.log("✅ Server running on http://localhost:3001");
+const PORT = process.env.PORT || 3001; //設定後端伺服器監聽的端口。
+
+server.listen(PORT, () => {
+    console.log(`伺服器正在監聽端口 ${PORT}`);
 });
