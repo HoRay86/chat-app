@@ -81,13 +81,17 @@ function App() {
   const handleSend = (e) => {
     e.preventDefault();
     if (message.trim()) {
+      const now = new Date();
+      const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
       socket.emit('chat message', {
         user: username,
         text: message,
         replyTo: replyTo ? { user: replyTo.user, text: replyTo.text } : null,
+        time,
       });
       setMessage('');
-      setTimeout(() => setReplyTo(null), 100); // 小延遲再清空 reply
+      setReplyTo(null);
     }
   };
 
@@ -156,7 +160,7 @@ function App() {
               >
                 <div className={isSelf ? 'message-self' : 'message-other'}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.9em' }}>
-                    👤 {msg.user}
+                    👤 {msg.user}  <small> 🕒 {msg.time}</small>
                   </div>
                   {msg.replyTo && (
                     <div style={{ fontSize: '0.8em', color: '#888', marginBottom: '4px' }}>
