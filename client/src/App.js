@@ -3,11 +3,14 @@ import { io } from 'socket.io-client';
 
 const socket = io('https://chat-app-server-rbkm.onrender.com');
 
-const hash = window.location.hash; // 例如 "#/room/222-rKmfQ0"
-const roomId = hash.split('/room/')[1] || 'default';
-const lastDashIndex = roomId.lastIndexOf('-');
-const encodedNameOnly = roomId.slice(0, lastDashIndex);
-const roomNameOnly = decodeURIComponent(encodedNameOnly);
+function getRoomName() {
+  const hash = window.location.hash;
+  const roomId = hash.split('/room/')[1] || 'default';
+  const lastDashIndex = roomId.lastIndexOf('-');
+  const encodedName = roomId.slice(0, lastDashIndex);
+  const roomName = decodeURIComponent(encodedName);
+  return { roomId, roomName };
+}
 
 function App() {
   const [username, setUsername] = useState('');
@@ -24,6 +27,7 @@ function App() {
 
   const messagesEndRef = useRef(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const { roomId, roomName } = getRoomName() 
   
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -79,7 +83,9 @@ function App() {
   const handleSend = (e) => {
     e.preventDefault();
     if (message.trim()) {
-      socket.emit('chat message', { roomId, username: tempName, text: message }); // 加入roomId
+      console.log('發送時的 roomId：', roomId);  // ✅ 應該是像 "chat-test-abc123"
+      console.log('發送者 user：', username);
+      socket.emit('chat message', { roomId, username: username, text: message }); // 加入roomId
       setMessage('');
     }
   };
@@ -88,7 +94,7 @@ function App() {
     e.preventDefault();
     if (tempName.trim()) {
       setUsername(tempName);
-      socket.emit('join-room', { roomId, username: tempName }); // 加入roomId
+      socket.emit('join-room', { roomId, username: username }); // 加入roomId
     }
   };
 
@@ -122,7 +128,7 @@ function App() {
     <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 style={{ margin: 0 }}>
-          💬 {roomNameOnly} Chat Room ({userCount}) - Hello, {username}!
+          💬 {roomName} Chat Room ({userCount}) - Hello, {username}!
         </h2>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center',  }}>
