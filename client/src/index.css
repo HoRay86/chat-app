@@ -144,14 +144,9 @@ button:hover {
 
 /* Mode Toggle */
 .mode-toggle-button {
-  position: fixed;
-  top: 10px;
-  right: 10px;
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 999;
-  color: inherit;
 }
 
 .mode-toggle-button i {
@@ -214,4 +209,21 @@ button:hover {
     background-color: #1e1e1e;
     color: #eee;
   }
+}
+
+.copy-button {
+  border: '1px solid #ccc';
+  background: 'transparent';
+  margin-left: 10px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  color: '#666';
+}
+
+.copy-tip {
+  font-size: 0.8em;
+  color: #437a45;
+  margin-top: 6px;
 }

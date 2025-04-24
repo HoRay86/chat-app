@@ -13,43 +13,51 @@ app.use(cors({
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",  // 如果部署後記得加安全的網域！
+        origin: '*',  // 如果部署後記得加安全的網域！
         methods: ["GET", "POST"]
     }
 });
-let users = {};
-const sendUserList = () => {
-  const userList = Object.values(users);
-  io.emit("user list", userList);
-};
+const rooms = {};
 
 io.on("connection", (socket) => {
 
-    // 監聽登入事件（帶上 user name）
-    socket.on("join", (username) => {
-        socket.username = username;
-        users[socket.id] = username;
-        socket.username = username; // 記住這個使用者
-        console.log(`📥 ${username} joined`);
-        io.emit("system message", `📥 [${username}] joined the chat`);
-        io.emit("user count", Object.keys(users).length);
-        sendUserList(); // 傳送新的用戶列表
+    // 監聽登入事件（帶上 room id & user name）
+    socket.on('join-room', ({ roomId, username }) => {
+        const nameList = Object.values(rooms[roomId] || {});
+        let finalName = username;
+
+        // 如果名稱已存在，加數字
+        let count = 1;
+        while (nameList.includes(finalName)) {
+            finalName = `${username} - ${count++}`;
+        }
+
+        socket.join(roomId);
+        socket.username = finalName;
+        socket.roomId = roomId;
+
+        if (!rooms[roomId]) rooms[roomId] = {};
+        rooms[roomId][socket.id] = finalName;
+
+        io.to(roomId).emit('system message', `📥 [${finalName}] joined the chat`);
+        io.to(roomId).emit('user list', Object.values(rooms[roomId]));
+        io.to(roomId).emit('user count', Object.keys(rooms[roomId]).length);
     });
 
-    // 普通訊息
-    socket.on("chat message", (msg) => {
-        io.emit("chat message", msg);
+
+    // 訊息傳送
+    socket.on('chat message', ({ roomId, user, text }) => {
+        io.to(roomId).emit('chat message', { user, text });
     });
 
     // 離線時發送系統訊息
-    socket.on("disconnect", () => {
-        if (users[socket.id]) {
-            const name = users[socket.id];
-            console.log(`📤 ${name} left (${socket.id})`);
-            io.emit("system message", `📤 [${name}] left the chat`);
-            delete users[socket.id];
-            io.emit("user count", Object.keys(users).length);
-            sendUserList(); // ✅ 傳送更新後的用戶列表
+    socket.on('disconnect', () => {
+        const room = socket.roomId;
+        const name = socket.username;
+        if (room && rooms[room]) {
+            delete rooms[room][socket.id];
+            io.to(room).emit('system message', `📤 [${name}] left the chat`);
+            io.to(room).emit('user list', Object.values(rooms[room]));
         }
     });
 });

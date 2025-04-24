@@ -3,22 +3,27 @@ import { io } from 'socket.io-client';
 
 const socket = io('https://chat-app-server-rbkm.onrender.com');
 
+const hash = window.location.hash; // 例如 "#/room/222-rKmfQ0"
+const roomId = hash.split('/room/')[1] || 'default';
+const lastDashIndex = roomId.lastIndexOf('-');
+const encodedNameOnly = roomId.slice(0, lastDashIndex);
+const roomNameOnly = decodeURIComponent(encodedNameOnly);
+
 function App() {
   const [username, setUsername] = useState('');
   const [tempName, setTempName] = useState('');
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState([]);
-  const [userCount, setUserCount] = useState(0);
+  const [userCount, setUserCount] = useState(1);
   const [userList, setUserList] = useState([]);
-
-  const getInitialMode = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
     const stored = localStorage.getItem('darkMode');
     if (stored !== null) return stored === 'true';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  };
-  const [isDarkMode, setIsDarkMode] = useState(getInitialMode);
-  const messagesEndRef = useRef(null);
+  });
 
+  const messagesEndRef = useRef(null);
+  const [copiedUrl, setCopiedUrl] = useState(false);
   
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -74,7 +79,7 @@ function App() {
   const handleSend = (e) => {
     e.preventDefault();
     if (message.trim()) {
-      socket.emit('chat message', { user: username, text: message });
+      socket.emit('chat message', { roomId, username: tempName, text: message }); // 加入roomId
       setMessage('');
     }
   };
@@ -83,8 +88,15 @@ function App() {
     e.preventDefault();
     if (tempName.trim()) {
       setUsername(tempName);
-      socket.emit('join', tempName); // let backend know user join
+      socket.emit('join-room', { roomId, username: tempName }); // 加入roomId
     }
+  };
+
+  const handleCopyRoomLink = () => {
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000); // Reset copied message after a short delay
   };
 
   // 還沒登入的畫面
@@ -108,17 +120,41 @@ function App() {
   // 聊天畫面
   return (
     <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
-      <h2>💬 Chat Room - Hello, {username}!</h2>
-      {/* <p>👥 {userCount} Online</p>
-      <p>🧍 Online Users: {userList.join(', ')}</p> */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0 }}>
+          💬 {roomNameOnly} Chat Room ({userCount}) - Hello, {username}!
+        </h2>
 
-      {/* 手動切換亮暗模式圖示 */}
-      <button
-        onClick={toggleDarkMode}
-        className="mode-toggle-button"
-      >
-        <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`}></i>
-      </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center',  }}>
+          <button
+            onClick={handleCopyRoomLink}
+            className="copy-button"
+            style={{
+              fontSize: '0.9em',
+              padding: '6px 10px',
+              color: '#666',
+              border: '1px solid #ccc',
+              background: 'transparent',
+              borderRadius: '6px'
+            }}
+          >
+            
+            {copiedUrl ? '✅ Copied!':  '🔗 Copy Room Link'}
+
+          </button>
+
+          <button
+            onClick={toggleDarkMode}
+            className="mode-toggle-button"
+            style={{ fontSize: '1.2em' }}
+          >
+            <i className={`fas fa-${isDarkMode ? 'sun' : 'moon'}`}></i>
+          </button>
+        </div>
+      </div>
+
+      <p>🧍 Online Users: {userList.join(', ')}</p>
+     
 
       <div className="chat-area">
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
