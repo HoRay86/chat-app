@@ -12,6 +12,14 @@ body,
   overflow: hidden;
 }
 
+/* === System Preference (Fallback only) === */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1e1e1e;
+    color: #eee;
+  }
+}
+
 /* Light Mode */
 .app-container:not(.dark-mode),
 .login-container:not(.dark-mode) {
@@ -132,8 +140,8 @@ button {
   padding: 8px 12px;
   font-size: 1em;
   border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #007bff;
+  /* border: 1px solid #ccc; */
+  background-color: #75b8ff;
   color: white;
   cursor: pointer;
 }
@@ -208,10 +216,44 @@ button:hover {
   background-color: #333;
   color: #aaa;
 }
-/* === System Preference (Fallback only) === */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #1e1e1e;
-    color: #eee;
-  }
+
+.replyButton {
+  /* border: none; */
+  background-color: transparent;
+  color: #c3c3c3;
+  font-size: 0.8em;
+  cursor: pointer;
+  margin-left: 6px;
+  padding: 0px 5px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.replyButton:hover {
+  background-color: #ddd;
+  color: #333;
+}
+
+.reply-preview {
+  background-color: #f1f1f1;
+  border-left: 4px solid #888;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reply-preview.dark-mode {
+  background-color: #333;
+  color: #eee;
+  border-left-color: #bbb;
+}
+
+.reply-preview small {
+  color: #666;
+  font-size: 0.75em;
 }
